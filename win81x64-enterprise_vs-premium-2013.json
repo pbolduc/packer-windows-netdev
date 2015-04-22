@@ -1,0 +1,164 @@
+{
+    "builders": [
+        {
+            "type": "vmware-iso",
+            "iso_url": "./iso/en_windows_8.1_enterprise_with_update_x64_dvd_6054382.iso",
+            "iso_checksum_type": "md5",
+            "iso_checksum": "115d7c4203417e52c09d16b50043b10d",
+            "headless": false,
+            "boot_wait": "2m",
+            "ssh_username": "vagrant",
+            "ssh_password": "vagrant",
+            "ssh_wait_timeout": "2h",
+            "shutdown_command": "{{ user `shutdown_command`}}",
+            "guest_os_type": "windows8srv-64",
+            "tools_upload_flavor": "windows",
+            "disk_size": 61440,
+            "vnc_port_min": 5900,
+            "vnc_port_max": 5980,
+            "floppy_files": [
+                "./answer_files/81/Autounattend.xml",
+                "./scripts/win-updates.ps1",
+                "./scripts/openssh.ps1",
+                "./answer_files/vs/AdminDeployment.xml"
+            ],
+            "vmx_data": {
+                "RemoteDisplay.vnc.enabled": "false",
+                "RemoteDisplay.vnc.port": "5900",
+                "memsize": "2048",
+                "numvcpus": "2",
+                "scsi0.virtualDev": "lsisas1068",
+                "virtualhw.version": "10",
+                "gui.fullScreenAtPowerOn": "TRUE",
+                "gui.viewModeAtPowerOn": "fullscreen",
+                "gui.lastPoweredViewMode": "fullscreen",
+                "gui.fitGuestUsingNativeDisplayResolution": "TRUE",
+                "gui.applyHostDisplayScalingToGuest": "FALSE"
+            }
+        },
+        {
+            "disk_size": 40960,
+            "floppy_files": [
+                "floppy/win81x64-enterprise/Autounattend.xml",
+                "scripts/openssh.ps1"
+            ],
+            "guest_os_type": "Windows8_64",
+            "headless": "{{ user `headless` }}",
+            "iso_checksum": "{{ user `iso_checksum` }}",
+            "iso_checksum_type": "{{ user `iso_checksum_type` }}",
+            "iso_url": "{{ user `iso_url` }}",
+            "shutdown_command": "{{ user `shutdown_command`}}",
+            "ssh_password": "vagrant",
+            "ssh_username": "vagrant",
+            "ssh_wait_timeout": "10000s",
+            "type": "virtualbox-iso",
+            "vboxmanage": [
+              ["setextradata", "{{.Name}}", "VBoxInternal/CPUM/CMPXCHG16B", "1"],
+              ["modifyvm", "{{.Name}}", "--memory", "1536" ],
+              ["modifyvm", "{{.Name}}", "--cpus", "1"]
+          ],
+          "vm_name": "win8x64-enterprise"
+        }
+    ],
+    "provisioners": [
+        {
+            "type": "shell",
+            "remote_path": "/tmp/script.bat",
+            "execute_command": "{{.Vars}} cmd /c C:/Windows/Temp/script.bat",
+            "scripts": [
+                "./scripts/vm-guest-tools.bat",
+                "./scripts/vagrant-ssh.bat",
+                "./scripts/dpi.bat",
+                "./scripts/unpinall.bat",
+                "./scripts/NoStupidHelp.bat"
+            ]
+        },
+        {
+            "type": "file",
+            "source": "iso/en_visual_studio_premium_2013_x86_dvd_3009258.iso",
+            "destination": "en_visual_studio_premium_2013_x86_dvd_3009258.iso"
+        },
+        {
+            "type": "file",
+            "source": "iso/ReSharperSetup.8.2.3000.5176.msi",
+            "destination": "ReSharperSetup.8.2.3000.5176.msi"
+        },
+        {
+            "type": "file",
+            "source": "./iso/HideMenu.vsix",
+            "destination": "HideMenu.vsix"
+        },
+        {
+            "type": "file",
+            "source": "./iso/SourceCodePro_FontsOnly-1.017.zip",
+            "destination": "SourceCodePro_FontsOnly-1.017.zip"
+        },
+        {
+            "type": "file",
+            "source": "./iso/Git-1.9.5-preview20150319.exe",
+            "destination": "Git-1.9.5-preview20150319.exe"
+        },
+        {
+            "type": "file",
+            "source": "./configs/Sane.vssettings",
+            "destination": "Sane.vssettings"
+        },
+        {
+            "type": "file",
+            "source": "./configs/vsActionManager.DotSettings",
+            "destination": "vsActionManager.DotSettings"
+        },
+        {
+            "type": "shell",
+            "remote_path": "/tmp/fonts.ps1",
+            "script": "scripts/fonts.ps1",
+            "execute_command": "powershell -File c:/windows/temp/fonts.ps1"
+        },
+        {
+            "type": "shell",
+            "remote_path": "/tmp/git.ps1",
+            "script": "scripts/git.ps1",
+            "execute_command": "powershell -File c:/windows/temp/git.ps1"
+        },
+        {
+            "type": "shell",
+            "remote_path": "/tmp/conemu.ps1",
+            "script": "scripts/conemu.ps1",
+            "execute_command": "powershell -File c:/windows/temp/conemu.ps1"
+        },
+        {
+            "type": "shell",
+            "remote_path": "/tmp/vs2013.ps1",
+            "script": "scripts/vs2013.ps1",
+            "execute_command": "powershell -File c:/windows/temp/vs2013.ps1"
+        },
+        {
+            "type": "shell",
+            "remote_path": "/tmp/reboot.bat",
+            "script": "scripts/reboot.bat",
+            "execute_command": "c:/windows/temp/reboot.bat"
+        },
+        {
+            "type": "shell", "inline": ["rm -rf /tmp/*"]
+        }
+    ],
+    "post-processors": [
+        {
+            "type": "vagrant",
+            "keep_input_artifact": false,
+            "output": "net_dev_{{.Provider}}.box",
+            "vagrantfile_template": "vagrantfile-net_dev.template"
+        }
+    ],
+    "variables": {
+        "cm": "chef",
+        "cm_version": "",
+        "headless": false,
+        "iso_checksum": "115d7c4203417e52c09d16b50043b10d",
+        "iso_url": "iso/en_windows_8.1_enterprise_with_update_x64_dvd_6054382.iso",
+        "iso_checksum_type": "md5",
+        "shutdown_command": "shutdown /s /t 10 /f /d p:4:1 /c 'Packer Shutdown'",
+        "update": true,
+        "version": "0.1.0"
+  }
+}
